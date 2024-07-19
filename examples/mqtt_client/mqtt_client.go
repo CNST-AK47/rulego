@@ -18,20 +18,22 @@ package main
 
 import (
 	"fmt"
-	"github.com/rulego/rulego"
-	"github.com/rulego/rulego/api/types"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/rulego/rulego"
+	"github.com/rulego/rulego/api/types"
 )
 
 // 数据经过js转换后，增加deviceId变量，然后往主题 topic: /device/msg/${deviceId}发送处理后msg数据
 // 其中${deviceId}为元数据的变量
 func main() {
-
+	// 创建配置
 	config := rulego.NewConfig()
-
+	// 创建新的元数据
 	metaData := types.NewMetadata()
+	// 放置值
 	metaData.PutValue("productType", "test01")
 
 	//js处理后，并调用http推送
@@ -42,8 +44,10 @@ func main() {
 
 	var i = 1
 	for i <= 5 {
+		// 开启5个线程，分别进行消息处理
 		go func(index int) {
 			msg := types.NewMsg(0, "TEST_MSG_TYPE1", types.JSON, metaData, "{\"temperature\":"+strconv.Itoa(index)+"}")
+			// 进行消息处理
 			ruleEngine.OnMsg(msg, types.WithEndFunc(func(ctx types.RuleContext, msg types.RuleMsg, err error) {
 				fmt.Println("msg处理结果=====")
 				//得到规则链处理结果
@@ -58,7 +62,7 @@ func main() {
 
 	//更新规则链节点配置，mqtt连接错误
 	updateChain := strings.Replace(chainJsonFile, "127.0.0.1:1883", "127.0.0.1:1885", -1)
-
+	// 重新加载配置节点
 	err = ruleEngine.ReloadSelf([]byte(updateChain), rulego.WithConfig(config))
 
 	//更新失败
@@ -68,6 +72,7 @@ func main() {
 
 	//继续使用之前的规则链发送
 	for i <= 10 {
+		// 再次发送消息进行处理
 		go func(index int) {
 			msg := types.NewMsg(0, "TEST_MSG_TYPE1", types.JSON, metaData, "{\"temperature\":"+strconv.Itoa(index)+"}")
 			ruleEngine.OnMsg(msg, types.WithEndFunc(func(ctx types.RuleContext, msg types.RuleMsg, err error) {

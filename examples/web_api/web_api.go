@@ -18,6 +18,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/rulego/rulego"
 	"github.com/rulego/rulego/api/types"
 	endpointApi "github.com/rulego/rulego/api/types/endpoint"
@@ -25,16 +29,14 @@ import (
 	"github.com/rulego/rulego/endpoint"
 	"github.com/rulego/rulego/endpoint/rest"
 	"github.com/rulego/rulego/utils/json"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 // 使用router开发web应用
 func main() {
-
+	// 创建新的配置器
 	config := rulego.NewConfig(types.WithDefaultPool())
 	//注册规则链
+	// 注册默认规则链
 	_, _ = rulego.New("default", []byte(chainJsonFile), rulego.WithConfig(config))
 
 	//启动http接收服务
@@ -51,18 +53,20 @@ func main() {
 		return true
 	})
 	//路由1
-	router1 := endpoint.NewRouter().From("/api/v1/user/:id").Process(func(router endpointApi.Router, exchange *endpointApi.Exchange) bool {
-		id := exchange.In.GetMsg().Metadata.GetValue("id")
-		//模拟查询数据库
-		user := struct {
-			Id   string
-			Name string
-		}{Id: id, Name: "test"}
-		body, _ := json.Marshal(user)
-		//响应结果
-		exchange.Out.SetBody(body)
-		return true
-	}).End()
+	router1 := endpoint.NewRouter().From("/api/v1/user/:id").Process(
+		func(router endpointApi.Router, exchange *endpointApi.Exchange) bool {
+			id := exchange.In.GetMsg().Metadata.GetValue("id")
+			//模拟查询数据库
+			user := struct {
+				Id   string
+				Name string
+			}{Id: id, Name: "test"}
+			body, _ := json.Marshal(user)
+			//响应结果
+			exchange.Out.SetBody(body)
+			return true
+		},
+	).End()
 
 	//注册路由,Get 方法
 	restEndpoint.GET(router1)

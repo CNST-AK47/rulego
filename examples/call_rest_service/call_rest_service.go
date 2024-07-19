@@ -18,28 +18,31 @@ package main
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/rulego/rulego"
 	"github.com/rulego/rulego/api/types"
-	"time"
 )
 
 // js处理后，并调用http服务对数据进行增加处理，并得到响应结果，后继续处理http响应的body数据
 // 如果http请求失败记录日志
 func main() {
-
+	// 创建新的配置
 	config := rulego.NewConfig()
-
+	// 元数据配置器
 	metaData := types.NewMetadata()
+	// 新增对应上下文
 	metaData.PutValue("productType", "test01")
 
 	//js处理后，并调用http 服务对数据进行处理，并得到响应结果，后继续处理
+	// 创建新的规则链引擎
 	ruleEngine, err := rulego.New("rule01", []byte(chainJsonFile), rulego.WithConfig(config))
 	if err != nil {
 		panic(err)
 	}
-
+	// 消息
 	msg := types.NewMsg(0, "TEST_MSG_TYPE1", types.JSON, metaData, "{\"temperature\":41}")
-
+	// 处理对应的消息
 	ruleEngine.OnMsg(msg, types.WithEndFunc(func(ctx types.RuleContext, msg types.RuleMsg, err error) {
 		fmt.Println("msg处理结果=====")
 		//得到规则链处理结果

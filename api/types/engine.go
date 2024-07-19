@@ -35,8 +35,11 @@ func WithAspects(aspects ...Aspect) RuleEngineOption {
 	}
 }
 
+// 设置规则引擎池
+// 通过切面反向的方式，直接将参数变更放到外面执行
 func WithRuleEnginePool(ruleEnginePool RuleEnginePool) RuleEngineOption {
 	return func(re RuleEngine) error {
+
 		re.SetRuleEnginePool(ruleEnginePool)
 		return nil
 	}

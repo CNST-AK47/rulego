@@ -17,11 +17,12 @@
 package engine
 
 import (
-	"github.com/rulego/rulego/api/types"
-	"github.com/rulego/rulego/utils/fs"
 	"log"
 	"strings"
 	"sync"
+
+	"github.com/rulego/rulego/api/types"
+	"github.com/rulego/rulego/utils/fs"
 )
 
 var _ types.RuleEnginePool = (*Pool)(nil)
@@ -73,15 +74,19 @@ func (g *Pool) Load(folderPath string, opts ...types.RuleEngineOption) error {
 // If the specified id is empty, the ruleChain.id from the rule chain file is used.
 func (g *Pool) New(id string, rootRuleChainSrc []byte, opts ...types.RuleEngineOption) (types.RuleEngine, error) {
 	// Check if an instance with the given ID already exists.
+	// 直接从引擎中加载
 	if v, ok := g.entries.Load(id); ok {
 		return v.(*RuleEngine), nil
 	} else {
+		// 新增参数设置
 		opts = append(opts, types.WithRuleEnginePool(g))
 		// Create a new rule engine instance.
+		// 创建一个新实例--
 		if ruleEngine, err := newRuleEngine(id, rootRuleChainSrc, opts...); err != nil {
 			return nil, err
 		} else {
 			// Store the new rule engine instance in the pool.
+			// 将实例放到内存池中
 			if ruleEngine.Id() != "" {
 				g.entries.Store(ruleEngine.Id(), ruleEngine)
 			}

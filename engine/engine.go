@@ -20,12 +20,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/rulego/rulego/api/types"
-	"github.com/rulego/rulego/builtin/aspect"
 	"reflect"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/rulego/rulego/api/types"
+	"github.com/rulego/rulego/builtin/aspect"
 )
 
 // Ensuring DefaultRuleContext implements types.RuleContext interface.
@@ -632,19 +633,23 @@ type RuleEngine struct {
 
 // newRuleEngine creates a new RuleEngine instance with the given ID and definition.
 // It applies the provided RuleEngineOptions during the creation process.
+// 创建新规则引擎
 func newRuleEngine(id string, def []byte, opts ...types.RuleEngineOption) (*RuleEngine, error) {
 	if len(def) == 0 {
 		return nil, errors.New("def can not nil")
 	}
 	// Create a new RuleEngine with the Id
+	// 创建对应的规则引擎
 	ruleEngine := &RuleEngine{
 		id:            id,
-		Config:        NewConfig(),
+		Config:        NewConfig(), // 配置项
 		ruleChainPool: DefaultPool,
 	}
+	// 加载规则引擎配置
 	err := ruleEngine.ReloadSelf(def, opts...)
 	if err == nil && ruleEngine.rootRuleChainCtx != nil {
 		if id != "" {
+			// 设置规则引擎上下文Id
 			ruleEngine.rootRuleChainCtx.Id = types.RuleNodeId{Id: id, Type: types.CHAIN}
 		} else {
 			// Use the rule chain ID if no ID is provided.
@@ -652,6 +657,7 @@ func newRuleEngine(id string, def []byte, opts ...types.RuleEngineOption) (*Rule
 		}
 	}
 	// Set the aspect lists.
+	// 设置切面，
 	startAspects, endAspects, completedAspects := ruleEngine.Aspects.GetChainAspects()
 	ruleEngine.startAspects = startAspects
 	ruleEngine.endAspects = endAspects

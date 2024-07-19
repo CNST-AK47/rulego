@@ -190,7 +190,7 @@ func (list AspectList) GetNodeAspects() ([]AroundAspect, []BeforeAspect, []After
 
 // GetChainAspects 获取规则链执行类型增强点切面列表
 func (list AspectList) GetChainAspects() ([]StartAspect, []EndAspect, []CompletedAspect) {
-
+	// 先进行排序--再进行相关过滤
 	//从小到大排序
 	sort.Slice(list, func(i, j int) bool {
 		return list[i].Order() < list[j].Order()

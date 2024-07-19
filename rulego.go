@@ -154,6 +154,7 @@ func (g *RuleGo) Load(folderPath string, opts ...types.RuleEngineOption) error {
 // New creates a new RuleEngine and stores it in the RuleGo rule chain pool.
 // If the specified id is empty (""), the ruleChain.id from the rule chain file is used.
 func (g *RuleGo) New(id string, rootRuleChainSrc []byte, opts ...types.RuleEngineOption) (types.RuleEngine, error) {
+	// 从规则引擎池中捞一个出来
 	return g.ruleEnginePool.New(id, rootRuleChainSrc, opts...)
 }
 
@@ -200,6 +201,7 @@ func Load(folderPath string, opts ...types.RuleEngineOption) error {
 }
 
 // New creates a new RuleEngine and stores it in the RuleGo rule chain pool.
+// 创建新规则引擎
 func New(id string, rootRuleChainSrc []byte, opts ...types.RuleEngineOption) (types.RuleEngine, error) {
 	return Rules.New(id, rootRuleChainSrc, opts...)
 }
