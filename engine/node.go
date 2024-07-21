@@ -18,6 +18,7 @@ package engine
 
 import (
 	"errors"
+
 	"github.com/rulego/rulego/api/types"
 	"github.com/rulego/rulego/utils/str"
 )
@@ -46,6 +47,7 @@ func InitRuleNodeCtx(config types.Config, chainCtx *RuleChainCtx, aspects types.
 	// Retrieve aspects for the engine.
 	_, nodeBeforeInitAspects, _, _, _ := aspects.GetEngineAspects()
 	// Iterate over the nodeBeforeInitAspects and call OnNodeBeforeInit on each aspect.
+	// 执行节点初始化切片
 	for _, aspect := range nodeBeforeInitAspects {
 		if err := aspect.OnNodeBeforeInit(selfDefinition); err != nil {
 			return nil, err

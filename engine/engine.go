@@ -639,7 +639,7 @@ func newRuleEngine(id string, def []byte, opts ...types.RuleEngineOption) (*Rule
 		return nil, errors.New("def can not nil")
 	}
 	// Create a new RuleEngine with the Id
-	// 创建对应的规则引擎
+	// 创建对应的规则引擎对象
 	ruleEngine := &RuleEngine{
 		id:            id,
 		Config:        NewConfig(), // 配置项
@@ -659,8 +659,11 @@ func newRuleEngine(id string, def []byte, opts ...types.RuleEngineOption) (*Rule
 	// Set the aspect lists.
 	// 设置切面，
 	startAspects, endAspects, completedAspects := ruleEngine.Aspects.GetChainAspects()
+	// 设置开始切面
 	ruleEngine.startAspects = startAspects
+	// 设置结束切面
 	ruleEngine.endAspects = endAspects
+	// 设置环绕切面
 	ruleEngine.completedAspects = completedAspects
 
 	return ruleEngine, err
@@ -727,6 +730,7 @@ func (e *RuleEngine) ReloadSelf(def []byte, opts ...types.RuleEngineOption) erro
 	for _, opt := range opts {
 		_ = opt(e)
 	}
+	// 检查是否已经初始化--用于重新加载规则时使用
 	if e.Initialized() {
 		//初始化内置切面
 		if len(e.Aspects) == 0 {
@@ -743,16 +747,19 @@ func (e *RuleEngine) ReloadSelf(def []byte, opts ...types.RuleEngineOption) erro
 		//初始化内置切面
 		e.initBuiltinsAspects()
 		//初始化
+		// 进行规则解析
 		if ctx, err := e.Config.Parser.DecodeRuleChain(e.Config, e.Aspects, def); err == nil {
 			if e.rootRuleChainCtx != nil {
 				ctx.(*RuleChainCtx).Id = e.rootRuleChainCtx.Id
 			}
 			e.rootRuleChainCtx = ctx.(*RuleChainCtx)
 			//设置子规则链池
+			//方便上下文查找更新
 			e.rootRuleChainCtx.SetRuleEnginePool(e.ruleChainPool)
 			//执行创建切面逻辑
 			_, _, createdAspects, _, _ := e.Aspects.GetEngineAspects()
 			for _, aop := range createdAspects {
+				// 创建对应的aop点
 				if err := aop.OnCreated(e.rootRuleChainCtx); err != nil {
 					return err
 				}
@@ -899,6 +906,7 @@ func (e *RuleEngine) onErrHandler(msg types.RuleMsg, rootCtxCopy *DefaultRuleCon
 // onMsgAndWait processes a message through the rule engine, optionally waiting for all nodes to complete.
 // It applies any provided RuleContextOptions to customize the execution context.
 func (e *RuleEngine) onMsgAndWait(msg types.RuleMsg, wait bool, opts ...types.RuleContextOption) {
+	// 规则上下文不为空，赋值上下文
 	if e.rootRuleChainCtx != nil {
 		// Create a copy of the root context for processing the message.
 		rootCtx := e.rootRuleChainCtx.rootRuleContext.(*DefaultRuleContext)

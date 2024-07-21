@@ -68,10 +68,10 @@ type RuleMetadata struct {
 	// Each object represents a rule node within the rule chain.
 	Nodes []*RuleNode `json:"nodes"`
 	// Connections define the connections between two nodes in the rule chain.
-	Connections []NodeConnection `json:"connections"`
+	Connections []NodeConnection `json:"connections"` // 节点连接关系
 	// Deprecated: Use Flow Node instead.
 	// RuleChainConnections are the connections between a node and a sub-rule chain.
-	RuleChainConnections []RuleChainConnection `json:"ruleChainConnections,omitempty"`
+	RuleChainConnections []RuleChainConnection `json:"ruleChainConnections,omitempty"` // 子链路规则连接
 }
 
 // RuleNode defines the information of a rule chain node.
@@ -90,7 +90,7 @@ type RuleNode struct {
 	// Configuration contains the configuration parameters of the node, which vary depending on the node type.
 	// For example, a JS filter node might have a `jsScript` field defining the filtering logic,
 	// while a REST API call node might have a `restEndpointUrlPattern` field defining the URL to call.
-	Configuration Configuration `json:"configuration"`
+	Configuration Configuration `json:"configuration"` // 节点配置选项
 }
 
 // NodeAdditionalInfo is used for visualization position information (reserved field).
@@ -157,6 +157,7 @@ type RuleNodeRunLog struct {
 }
 
 // EndpointDsl defines the DSL for an endpoint.
+// 终结点定义
 type EndpointDsl struct {
 	// Id is the endpoint ID.
 	Id string `json:"id"`

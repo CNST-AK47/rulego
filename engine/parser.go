@@ -18,6 +18,7 @@ package engine
 
 import (
 	"errors"
+
 	"github.com/rulego/rulego/api/types"
 	"github.com/rulego/rulego/utils/json"
 )
@@ -26,9 +27,12 @@ import (
 type JsonParser struct {
 }
 
+// 进行基础规则解析
 func (p *JsonParser) DecodeRuleChain(config types.Config, aspects types.AspectList, dsl []byte) (types.Node, error) {
+	// 解析加载types.RuleChain
 	if rootRuleChainDef, err := ParserRuleChain(dsl); err == nil {
 		//初始化
+		// 进行规则引擎初始化
 		return InitRuleChainCtx(config, aspects, &rootRuleChainDef)
 	} else {
 		return nil, err
@@ -68,6 +72,7 @@ func (p *JsonParser) EncodeRuleNode(def interface{}) ([]byte, error) {
 }
 
 // ParserRuleChain 通过json解析规则链结构体
+// 将其解析为rulechain对象
 func ParserRuleChain(rootRuleChain []byte) (types.RuleChain, error) {
 	var def types.RuleChain
 	err := json.Unmarshal(rootRuleChain, &def)
