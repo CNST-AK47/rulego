@@ -221,13 +221,17 @@ func (list AspectList) GetEngineAspects() ([]OnChainBeforeInitAspect, []OnNodeBe
 	sort.Slice(list, func(i, j int) bool {
 		return list[i].Order() < list[j].Order()
 	})
-
+	// 规则链初始化前的切面
 	var chainBeforeInitAspects []OnChainBeforeInitAspect
+	// 节点初始化前的切面
 	var nodeBeforeInitAspects []OnNodeBeforeInitAspect
+	// 创建时期的切面
 	var createdAspects []OnCreatedAspect
+	// 加载之后的切面
 	var afterReloadAspects []OnReloadAspect
+	// 销毁切面
 	var destroyAspects []OnDestroyAspect
-
+	// 根据类型判断添加
 	for _, item := range list {
 		if a, ok := item.(OnChainBeforeInitAspect); ok {
 			chainBeforeInitAspects = append(chainBeforeInitAspects, a)

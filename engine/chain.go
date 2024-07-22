@@ -83,7 +83,7 @@ func InitRuleChainCtx(config types.Config, aspects types.AspectList, ruleChainDe
 	chainBeforeInitAspects, _, _, afterReloadAspects, destroyAspects := aspects.GetEngineAspects()
 	// 执行规则引擎初始化函数
 	for _, aspect := range chainBeforeInitAspects {
-		// 规则引擎初始化的节点
+		// 规则引擎初始化的节点--执行初始化函数
 		if err := aspect.OnChainBeforeInit(ruleChainDef); err != nil {
 			return nil, err
 		}
@@ -104,6 +104,7 @@ func InitRuleChainCtx(config types.Config, aspects types.AspectList, ruleChainDe
 		destroyAspects:     destroyAspects,                                      // 销毁切片
 	}
 	// Set the ID of the rule chain context if provided in the definition.
+	// 设置规则链上下文ID
 	if ruleChainDef.RuleChain.ID != "" {
 		ruleChainCtx.Id = types.RuleNodeId{Id: ruleChainDef.RuleChain.ID, Type: types.CHAIN}
 	}
@@ -121,6 +122,7 @@ func InitRuleChainCtx(config types.Config, aspects types.AspectList, ruleChainDe
 		// 解密信息
 		ruleChainCtx.decryptSecrets = decryptSecret(secrets, []byte(config.SecretKey))
 	}
+	// 获取节点列表
 	nodeLen := len(ruleChainDef.Metadata.Nodes)
 	ruleChainCtx.nodeIds = make([]types.RuleNodeId, nodeLen)
 	// Load all node information.
@@ -136,6 +138,7 @@ func InitRuleChainCtx(config types.Config, aspects types.AspectList, ruleChainDe
 		if err != nil {
 			return nil, err
 		}
+		// 更新节点上下文
 		ruleChainCtx.nodes[ruleNodeId] = ruleNodeCtx
 	}
 	// Load node relationship information.
@@ -143,18 +146,19 @@ func InitRuleChainCtx(config types.Config, aspects types.AspectList, ruleChainDe
 	for _, item := range ruleChainDef.Metadata.Connections {
 		inNodeId := types.RuleNodeId{Id: item.FromId, Type: types.NODE}
 		outNodeId := types.RuleNodeId{Id: item.ToId, Type: types.NODE}
+		// 定义节点连接关系
 		ruleNodeRelation := types.RuleNodeRelation{
 			InId:         inNodeId,
 			OutId:        outNodeId,
 			RelationType: item.Type,
 		}
+		// 查询节点关系
 		nodeRelations, ok := ruleChainCtx.nodeRoutes[inNodeId]
-
-		if ok {
-			nodeRelations = append(nodeRelations, ruleNodeRelation)
-		} else {
+		if !ok {
 			nodeRelations = []types.RuleNodeRelation{ruleNodeRelation}
 		}
+		nodeRelations = append(nodeRelations, ruleNodeRelation)
+		// 更新节点路由
 		ruleChainCtx.nodeRoutes[inNodeId] = nodeRelations
 	}
 	// Load sub-rule chains.
@@ -167,22 +171,25 @@ func InitRuleChainCtx(config types.Config, aspects types.AspectList, ruleChainDe
 			OutId:        outNodeId,
 			RelationType: item.Type,
 		}
-
+		// 查询子规则接入节点
 		nodeRelations, ok := ruleChainCtx.nodeRoutes[inNodeId]
 		if ok {
 			nodeRelations = append(nodeRelations, ruleChainRelation)
 		} else {
 			nodeRelations = []types.RuleNodeRelation{ruleChainRelation}
 		}
+		// 更新关系
 		ruleChainCtx.nodeRoutes[inNodeId] = nodeRelations
 	}
 	// Initialize the root rule context.
 	// 初始化根节点上下文
 	if firstNode, ok := ruleChainCtx.GetFirstNode(); ok {
+		// 获取根节点上下文
 		ruleChainCtx.rootRuleContext = NewRuleContext(context.TODO(), ruleChainCtx.config, ruleChainCtx, nil,
 			firstNode, config.Pool, nil, nil)
 	} else {
 		// If there are no nodes, initialize an empty node context.
+		// 初始化一个空节点上下文
 		ruleNodeCtx, _ := InitRuleNodeCtx(config, ruleChainCtx, aspects, &types.RuleNode{})
 		ruleChainCtx.rootRuleContext = NewRuleContext(context.TODO(), ruleChainCtx.config, ruleChainCtx, nil,
 			ruleNodeCtx, config.Pool, nil, nil)

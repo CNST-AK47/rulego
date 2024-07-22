@@ -17,9 +17,10 @@
 package types
 
 import (
-	"github.com/rulego/rulego/api/pool"
 	"math"
 	"time"
+
+	"github.com/rulego/rulego/api/pool"
 )
 
 // OnDebug is a global debug callback function for nodes.
@@ -46,17 +47,17 @@ type Config struct {
 	// Example:
 	//   pool, _ := ants.NewPool(math.MaxInt32)
 	//   config := rulego.NewConfig(types.WithPool(pool))
-	Pool Pool
+	Pool Pool // 协程池
 	// ComponentsRegistry is the component registry, defaulting to `rulego.Registry`.
-	ComponentsRegistry ComponentRegistry
+	ComponentsRegistry ComponentRegistry // 节点规则组
 	// Parser is the rule chain parser interface, defaulting to `rulego.JsonParser`.
-	Parser Parser
+	Parser Parser // 解析器
 	// Logger is the logging interface, defaulting to `DefaultLogger()`.
-	Logger Logger
+	Logger Logger // 日志
 	// Properties are global properties in key-value format.
 	// Rule chain node configurations can replace values with ${global.propertyKey}.
 	// Replacement occurs during node initialization and only once.
-	Properties Metadata
+	Properties Metadata // metadata详细信息
 	// Udf is a map for registering custom Golang functions and native scripts that can be called at runtime by script engines like JavaScript.
 	// Function names can be repeated for different script types.
 	Udf map[string]interface{}

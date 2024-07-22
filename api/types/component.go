@@ -28,8 +28,10 @@ type ComponentDefGetter interface {
 }
 
 // ComponentFormList 组件表单类别类型
+// 全局组件列表
 type ComponentFormList map[string]ComponentForm
 
+// 查询组件列表
 func (c ComponentFormList) GetComponent(name string) (ComponentForm, bool) {
 	for _, item := range c {
 		if item.Type == name {

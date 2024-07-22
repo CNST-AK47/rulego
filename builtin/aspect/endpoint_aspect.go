@@ -17,13 +17,15 @@
 package aspect
 
 import (
+	"reflect"
+	"sync"
+
 	"github.com/gofrs/uuid/v5"
 	"github.com/rulego/rulego/api/types"
 	"github.com/rulego/rulego/api/types/endpoint"
-	"reflect"
-	"sync"
 )
 
+// 进行静态编译类型检查
 var (
 	_ types.OnCreatedAspect = (*EndpointAspect)(nil)
 	_ types.OnReloadAspect  = (*EndpointAspect)(nil)
@@ -35,6 +37,7 @@ type EndpointAspect struct {
 	ruleChainEndpoint *RuleChainEndpoint
 }
 
+// 排序
 func (aspect *EndpointAspect) Order() int {
 	return 900
 }
@@ -83,10 +86,11 @@ func (aspect *EndpointAspect) OnDestroy(ctx types.NodeCtx) {
 	}
 }
 
+// 规则引擎终端节点
 type RuleChainEndpoint struct {
-	ruleEngineId string
-	endpointPool endpoint.Pool
-	ruleGoPool   types.RuleEnginePool
+	ruleEngineId string               // 规则引擎ID
+	endpointPool endpoint.Pool        // 终端节点
+	ruleGoPool   types.RuleEnginePool // 规则引擎池
 	endpoints    map[string]endpoint.DynamicEndpoint
 	config       types.Config
 	sync.RWMutex

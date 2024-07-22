@@ -43,8 +43,10 @@ type RuleNodeCtx struct {
 
 // InitRuleNodeCtx initializes a RuleNodeCtx with the given configuration, chain context, and self-definition.
 // It attempts to create a new node based on the type defined in selfDefinition.
+// 初始化节点上下文，用于节点上下文计算
 func InitRuleNodeCtx(config types.Config, chainCtx *RuleChainCtx, aspects types.AspectList, selfDefinition *types.RuleNode) (*RuleNodeCtx, error) {
 	// Retrieve aspects for the engine.
+	// 获取节点切片
 	_, nodeBeforeInitAspects, _, _, _ := aspects.GetEngineAspects()
 	// Iterate over the nodeBeforeInitAspects and call OnNodeBeforeInit on each aspect.
 	// 执行节点初始化切片
@@ -54,6 +56,7 @@ func InitRuleNodeCtx(config types.Config, chainCtx *RuleChainCtx, aspects types.
 		}
 	}
 	// Attempt to create a new node from the components registry using the type specified in selfDefinition.
+	// 创建新节点
 	node, err := config.ComponentsRegistry.NewNode(selfDefinition.Type)
 	if err != nil {
 		// If there is an error in creating the node, return a RuleNodeCtx with the provided context and definition.
@@ -69,21 +72,24 @@ func InitRuleNodeCtx(config types.Config, chainCtx *RuleChainCtx, aspects types.
 			selfDefinition.Configuration = make(types.Configuration)
 		}
 		// Process variables within the configuration.
+		// 处理配置变量
 		configuration, err := processVariables(config, chainCtx, selfDefinition.Configuration)
 		if err != nil {
 			return &RuleNodeCtx{}, err
 		}
 		// Initialize the node with the processed configuration.
+		// 使用配置初始化节点
 		if err = node.Init(config, configuration); err != nil {
 			return &RuleNodeCtx{}, err
 		} else {
 			// Return a RuleNodeCtx with the initialized node and provided context and definition.
+			// 返回已经初始化好的节点上下文
 			return &RuleNodeCtx{
-				Node:           node,
-				ChainCtx:       chainCtx,
-				SelfDefinition: selfDefinition,
-				config:         config,
-				aspects:        aspects,
+				Node:           node,           // 节点
+				ChainCtx:       chainCtx,       // 规则链上下文
+				SelfDefinition: selfDefinition, // 定义内容
+				config:         config,         // 配置信息
+				aspects:        aspects,        // 对应切面
 			}, nil
 		}
 	}
@@ -143,31 +149,40 @@ func (rn *RuleNodeCtx) Copy(newCtx *RuleNodeCtx) {
 func processVariables(config types.Config, chainCtx *RuleChainCtx, configuration types.Configuration) (types.Configuration, error) {
 	var result = make(types.Configuration)
 	globalEnv := make(map[string]string)
-
+	// 获取globalEnv变量
 	if config.Properties != nil {
 		globalEnv = config.Properties.Values()
 	}
-
+	// 定义环境
 	var varsEnv map[string]string
+	// 解码
 	var decryptSecrets map[string]string
-
+	// 链式上下文
 	if chainCtx != nil {
+		// 复制变量
 		varsEnv = copyMap(chainCtx.vars)
 		//解密Secrets
 		decryptSecrets = copyMap(chainCtx.decryptSecrets)
 	}
+	// 配置获取，根据最终配置值进行获取
 	for key, value := range configuration {
 		if strV, ok := value.(string); ok {
+			// 进行配置值替换
 			v := str.SprintfVar(strV, types.Global+".", globalEnv)
+			// 进行变量值替换
 			v = str.SprintfVar(v, types.Vars+".", varsEnv)
+			// 记录最终值
 			result[key] = v
 		} else {
+			// 直接更新值
 			result[key] = value
 		}
 	}
+	// 检查环境变量是否正确
 	if varsEnv != nil {
 		result[types.Vars] = varsEnv
 	}
+	// 进行加密信息查询
 	if decryptSecrets != nil {
 		result[types.Secrets] = decryptSecrets
 	}

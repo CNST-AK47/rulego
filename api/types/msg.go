@@ -17,8 +17,9 @@
 package types
 
 import (
-	"github.com/gofrs/uuid/v5"
 	"time"
+
+	"github.com/gofrs/uuid/v5"
 )
 
 // DataType defines the type of data contained in a message.
@@ -90,6 +91,7 @@ func (md Metadata) Values() map[string]string {
 }
 
 // RuleMsg is a type for messages within the rule engine.
+// 规则message 异常
 type RuleMsg struct {
 	// Ts is the message timestamp.
 	Ts int64 `json:"ts"`

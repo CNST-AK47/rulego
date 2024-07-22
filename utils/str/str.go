@@ -18,11 +18,12 @@ package str
 
 import (
 	"fmt"
-	"github.com/rulego/rulego/utils/json"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/rulego/rulego/utils/json"
 )
 
 const varPatternLeft = "${"
@@ -51,14 +52,18 @@ func SprintfDict(pattern string, dict map[string]string) string {
 // 如果pattern包含一个不在dict中的key，它将保持不变。
 // 如果dict包含一个不在pattern中的key，它将被忽略。
 func SprintfVar(pattern string, keyPrefix string, dict map[string]string) string {
+	// 最终结果
 	var result = pattern
+	// 遍历map进行处理
 	for key, value := range dict {
 		result = ProcessVar(result, keyPrefix+key, value)
 	}
 	return result
 }
 
+// 将第一个个变量进行替换
 func ProcessVar(pattern, key, val string) string {
+	// 变量信息
 	varPattern := varPatternLeft + key + varPatternRight
 	return strings.Replace(pattern, varPattern, val, -1)
 }

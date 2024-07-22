@@ -39,59 +39,63 @@ var _ types.RuleEngine = (*RuleEngine)(nil)
 var BuiltinsAspects = []types.Aspect{&aspect.Debug{}}
 
 // DefaultRuleContext is the default context for message processing in the rule engine.
+// 默认规则引擎上下文，每个msg进行处理时，都会重新进行创建
 type DefaultRuleContext struct {
 	// Context for sharing semaphores and data across different components.
-	context context.Context
+	context context.Context // 信号和数据传递山西该文
 	// Configuration settings for the rule engine.
-	config types.Config
+	config types.Config // 相关配置
 	// Context of the root rule chain.
-	ruleChainCtx *RuleChainCtx
+	ruleChainCtx *RuleChainCtx // 规则链运行上下文
 	// Context of the previous node.
-	from types.NodeCtx
+	from types.NodeCtx // 前一个节点上下文
 	// Context of the current node.
-	self types.NodeCtx
+	self types.NodeCtx // 当前节点上下文
 	// Indicates if this is the first node in the chain.
-	isFirst bool
+	isFirst bool // 是否为根节点
 	// Goroutine pool for concurrent execution.
-	pool types.Pool
+	pool types.Pool // 对应协程池
 	// Callback function for when the rule chain branch processing ends.
-	onEnd types.OnEndFunc
+	onEnd types.OnEndFunc // 终结处理函数
 	// Count of child nodes that have not yet completed execution.
-	waitingCount int32
+	waitingCount int32 // 还在执行中的子节点数量
 	// Parent rule context.
-	parentRuleCtx *DefaultRuleContext
+	parentRuleCtx *DefaultRuleContext // 默认的整体上下文
 	// Event that triggers once when all child nodes have completed, executed only once.
-	onAllNodeCompleted func()
+	onAllNodeCompleted func() // 当所有节点都执行完成后的通知函数
 	// Indicates if the onAllNodeCompleted function has been executed.
-	onAllNodeCompletedDone int32
+	onAllNodeCompletedDone int32 //
 	// Pool for sub-rule chains.
-	ruleChainPool types.RuleEnginePool
+	ruleChainPool types.RuleEnginePool // 对应的规则引擎池
 	// Indicates whether to skip executing child nodes, default is false.
-	skipTellNext bool
+	skipTellNext bool // 是否跳过执行中的节点
 	// List of aspects.
-	aspects types.AspectList
+	aspects types.AspectList // 所有的切片列表
 	// List of around aspects.
-	aroundAspects []types.AroundAspect
+	aroundAspects []types.AroundAspect // 环绕切面
 	// List of before aspects.
-	beforeAspects []types.BeforeAspect
+	beforeAspects []types.BeforeAspect // 预先切面
 	// List of after aspects.
-	afterAspects []types.AfterAspect
+	afterAspects []types.AfterAspect // 之后切面
 	// Runtime snapshot for debugging and logging.
-	runSnapshot *RunSnapshot
+	runSnapshot *RunSnapshot // 运行时闪照
 	initErr     error
 	// used when the first node of the rule chain is processed.
-	firstNodeRelationTypes []string
+	firstNodeRelationTypes []string // 关联的第一个节点类型
 }
 
 // NewRuleContext creates a new instance of the default rule engine message processing context.
+// 创建一个默认的规则上下文
 func NewRuleContext(context context.Context, config types.Config, ruleChainCtx *RuleChainCtx, from types.NodeCtx, self types.NodeCtx, pool types.Pool, onEnd types.OnEndFunc, ruleChainPool types.RuleEnginePool) *DefaultRuleContext {
 	// Initialize aspects list.
+	// 初始化切面列表
 	var aspects types.AspectList
 	if ruleChainCtx != nil {
 		aspects = ruleChainCtx.aspects
 	}
 	// If no aspects are defined, use built-in aspects.
 	if len(aspects) == 0 {
+		// 获取切片
 		for _, builtinsAspect := range BuiltinsAspects {
 			aspects = append(aspects, builtinsAspect.New())
 		}
@@ -99,20 +103,21 @@ func NewRuleContext(context context.Context, config types.Config, ruleChainCtx *
 	// Get node-specific aspects.
 	aroundAspects, beforeAspects, afterAspects := aspects.GetNodeAspects()
 	// Return a new DefaultRuleContext populated with the provided parameters and aspects.
+	// 获取默认的规则引擎上下文
 	return &DefaultRuleContext{
-		context:       context,
-		config:        config,
-		ruleChainCtx:  ruleChainCtx,
-		from:          from,
-		self:          self,
-		isFirst:       from == nil,
-		pool:          pool,
-		onEnd:         onEnd,
-		ruleChainPool: ruleChainPool,
-		aspects:       aspects,
-		aroundAspects: aroundAspects,
-		beforeAspects: beforeAspects,
-		afterAspects:  afterAspects,
+		context:       context,       // 上下文
+		config:        config,        // 配置信息
+		ruleChainCtx:  ruleChainCtx,  // 规则链上下文
+		from:          from,          // 来源信息
+		self:          self,          // 自定义信息
+		isFirst:       from == nil,   // 是否为首节点
+		pool:          pool,          // 池信息
+		onEnd:         onEnd,         // 是否结束
+		ruleChainPool: ruleChainPool, // 规则链池
+		aspects:       aspects,       // 切片信息
+		aroundAspects: aroundAspects, // 环绕切片
+		beforeAspects: beforeAspects, // 之前的切片
+		afterAspects:  afterAspects,  // 之后切面
 	}
 }
 
@@ -251,10 +256,12 @@ func (ctx *DefaultRuleContext) TellFailure(msg types.RuleMsg, err error) {
 	ctx.tell(msg, err, types.Failure)
 }
 
+// 进行下一个函数处理
 func (ctx *DefaultRuleContext) TellNext(msg types.RuleMsg, relationTypes ...string) {
 	ctx.tell(msg, nil, relationTypes...)
 }
 
+// 执行自身
 func (ctx *DefaultRuleContext) TellSelf(msg types.RuleMsg, delayMs int64) {
 	time.AfterFunc(time.Millisecond*time.Duration(delayMs), func() {
 		ctx.self.OnMsg(ctx, msg)
@@ -313,6 +320,7 @@ func (ctx *DefaultRuleContext) SubmitTack(task func()) {
 			ctx.config.Logger.Printf("SubmitTack error:%s", err)
 		}
 	} else {
+		// 执行任务函数
 		go task()
 	}
 }
@@ -493,10 +501,14 @@ func (ctx *DefaultRuleContext) getNextNodes(relationType string) ([]types.NodeCt
 // tellSelf 执行自身节点
 func (ctx *DefaultRuleContext) tellSelf(msg types.RuleMsg, err error, relationTypes ...string) {
 	msgCopy := msg.Copy()
+	// 提交追踪
 	ctx.SubmitTack(func() {
+		// 如果为空
 		if ctx.self != nil {
+			// 执行下一个函数
 			ctx.tellNext(msgCopy, ctx.self, "")
 		} else {
+			// 执行结束函数
 			ctx.DoOnEnd(msgCopy, err, "")
 		}
 	})
@@ -504,6 +516,7 @@ func (ctx *DefaultRuleContext) tellSelf(msg types.RuleMsg, err error, relationTy
 
 // tellNext 通知执行子节点，如果是当前第一个节点则执行当前节点
 func (ctx *DefaultRuleContext) tell(msg types.RuleMsg, err error, relationTypes ...string) {
+	// 执行节点
 	ctx.tellOrElse(msg, err, "", relationTypes...)
 }
 
@@ -512,6 +525,7 @@ func (ctx *DefaultRuleContext) tell(msg types.RuleMsg, err error, relationTypes 
 func (ctx *DefaultRuleContext) tellOrElse(msg types.RuleMsg, err error, defaultRelationType string, relationTypes ...string) {
 	//msgCopy := msg.Copy()
 	if ctx.isFirst {
+		// 执行自身
 		ctx.tellSelf(msg, err, relationTypes...)
 	} else {
 		if relationTypes == nil {
@@ -520,6 +534,7 @@ func (ctx *DefaultRuleContext) tellOrElse(msg types.RuleMsg, err error, defaultR
 		} else {
 			for _, relationType := range relationTypes {
 				//执行After aop
+				// 返回执行后的结果
 				msg = ctx.executeAfterAop(msg, err, relationType)
 				var ok = false
 				var nodes []types.NodeCtx
@@ -575,6 +590,7 @@ func (ctx *DefaultRuleContext) executeAroundAop(msg types.RuleMsg, relationType 
 }
 
 // 执行After aop
+// 执行aferAop
 func (ctx *DefaultRuleContext) executeAfterAop(msg types.RuleMsg, err error, relationType string) types.RuleMsg {
 	// after aop
 	for _, aop := range ctx.afterAspects {
@@ -596,15 +612,15 @@ func (ctx *DefaultRuleContext) tellNext(msg types.RuleMsg, nextNode types.NodeCt
 			ctx.childDone()
 		}
 	}()
-
+	// 创建新的节点上下文
 	nextCtx := ctx.NewNextNodeRuleContext(nextNode)
 
 	//环绕aop
 	if !nextCtx.executeAroundAop(msg, relationType) {
 		return
 	}
-	// AroundAop 已经执行节点OnMsg逻辑，不在执行下面的逻辑
-
+	// AroundAop 已经执行节点OnMsg逻辑，不再执行下面的逻辑
+	// 执行节点Msg处理函数
 	nextNode.OnMsg(nextCtx, msg)
 }
 
@@ -843,6 +859,7 @@ func (e *RuleEngine) Stop() {
 
 // OnMsg asynchronously processes a message using the rule engine.
 // It accepts optional RuleContextOption parameters to customize the execution context.
+// 进行相关异步处理
 func (e *RuleEngine) OnMsg(msg types.RuleMsg, opts ...types.RuleContextOption) {
 	e.onMsgAndWait(msg, false, opts...)
 }
@@ -888,32 +905,40 @@ func (e *RuleEngine) doOnAllNodeCompleted(rootCtxCopy *DefaultRuleContext, msg t
 
 // onErrHandler handles the scenario where the rule chain has no nodes or fails to process the message.
 // It logs an error and triggers the end-of-chain callbacks.
+// 故障异常处理函数
 func (e *RuleEngine) onErrHandler(msg types.RuleMsg, rootCtxCopy *DefaultRuleContext, err error) {
 	// Trigger the configured OnEnd callback with the error.
 	if rootCtxCopy.config.OnEnd != nil {
+		// 处理尾部函数
 		rootCtxCopy.config.OnEnd(msg, err)
 	}
 	// Trigger the onEnd callback with the error and Failure relation type.
 	if rootCtxCopy.onEnd != nil {
+		// 本身的处理函数
 		rootCtxCopy.onEnd(rootCtxCopy, msg, err, types.Failure)
 	}
 	// Execute the onAllNodeCompleted callback if it exists.
 	if rootCtxCopy.onAllNodeCompleted != nil {
+		// 所有节点处理函数
 		rootCtxCopy.onAllNodeCompleted()
 	}
 }
 
 // onMsgAndWait processes a message through the rule engine, optionally waiting for all nodes to complete.
 // It applies any provided RuleContextOptions to customize the execution context.
+// 进行核心的规则处理
 func (e *RuleEngine) onMsgAndWait(msg types.RuleMsg, wait bool, opts ...types.RuleContextOption) {
 	// 规则上下文不为空，赋值上下文
 	if e.rootRuleChainCtx != nil {
 		// Create a copy of the root context for processing the message.
 		rootCtx := e.rootRuleChainCtx.rootRuleContext.(*DefaultRuleContext)
-		rootCtxCopy := NewRuleContext(rootCtx.GetContext(), rootCtx.config, rootCtx.ruleChainCtx, rootCtx.from, rootCtx.self, rootCtx.pool, rootCtx.onEnd, e.ruleChainPool)
+		// 进行复制
+		rootCtxCopy := NewRuleContext(
+			rootCtx.GetContext(), rootCtx.config, rootCtx.ruleChainCtx, rootCtx.from, rootCtx.self, rootCtx.pool, rootCtx.onEnd, e.ruleChainPool)
 		rootCtxCopy.isFirst = rootCtx.isFirst
 		rootCtxCopy.runSnapshot = NewRunSnapshot(msg.Id, rootCtxCopy.ruleChainCtx, time.Now().UnixMilli())
 		// Apply the provided options to the context copy.
+		// 进行上下文设置
 		for _, opt := range opts {
 			opt(rootCtxCopy)
 		}
@@ -927,15 +952,19 @@ func (e *RuleEngine) onMsgAndWait(msg types.RuleMsg, wait bool, opts ...types.Ru
 			return
 		}
 		// Execute start aspects and update the message accordingly.
+		// 执行启动切片
 		msg = e.onStart(rootCtxCopy, msg)
 
 		// Set up a custom end callback function.
 		customOnEndFunc := rootCtxCopy.onEnd
+		// 设置最终结尾处理函数
 		rootCtxCopy.onEnd = func(ctx types.RuleContext, msg types.RuleMsg, err error, relationType string) {
 			// Execute end aspects and update the message accordingly.
+			// 执行对应的处理函数
 			msg = e.onEnd(rootCtxCopy, msg, err, relationType)
 			// Trigger the custom end callback if provided.
 			if customOnEndFunc != nil {
+				// 触发终结处理函数
 				customOnEndFunc(ctx, msg, err, relationType)
 			}
 
@@ -943,6 +972,7 @@ func (e *RuleEngine) onMsgAndWait(msg types.RuleMsg, wait bool, opts ...types.Ru
 		// Set up a custom function to be called upon completion of all nodes.
 		customFunc := rootCtxCopy.onAllNodeCompleted
 		// If waiting is required, set up a channel to synchronize the completion.
+		// 确认等待，则需要所有都执行完了，再继续
 		if wait {
 			c := make(chan struct{})
 			rootCtxCopy.onAllNodeCompleted = func() {
@@ -951,11 +981,13 @@ func (e *RuleEngine) onMsgAndWait(msg types.RuleMsg, wait bool, opts ...types.Ru
 				e.doOnAllNodeCompleted(rootCtxCopy, msg, customFunc)
 			}
 			// Process the message through the rule chain.
+			// 优先处理接下来的
 			rootCtxCopy.TellNext(msg, rootCtxCopy.firstNodeRelationTypes...)
 			// Block until all nodes have completed.
 			<-c
 		} else {
 			// If not waiting, simply set the completion handling function.
+			// 不需要等待，直接异步执行
 			rootCtxCopy.onAllNodeCompleted = func() {
 				e.doOnAllNodeCompleted(rootCtxCopy, msg, customFunc)
 			}
@@ -972,7 +1004,9 @@ func (e *RuleEngine) onMsgAndWait(msg types.RuleMsg, wait bool, opts ...types.Ru
 // onStart executes the list of start aspects before the rule chain begins processing a message.
 func (e *RuleEngine) onStart(ctx types.RuleContext, msg types.RuleMsg) types.RuleMsg {
 	for _, aop := range e.startAspects {
+		// 检查是否匹配到了切点
 		if aop.PointCut(ctx, msg, "") {
+			// 执行对应切面处理函数
 			msg = aop.Start(ctx, msg)
 		}
 	}

@@ -30,6 +30,7 @@ package external
 import (
 	"errors"
 	"fmt"
+
 	"github.com/rulego/rulego/api/types"
 	"github.com/rulego/rulego/utils/maps"
 	"github.com/rulego/rulego/utils/str"
@@ -93,7 +94,10 @@ func (x *SshNode) Init(ruleConfig types.Config, configuration types.Configuratio
 		// 从配置中获取 ssh 连接的参数
 		sshConfig := x.Config
 		// 如果参数不为空，则创建一个 ssh 客户端对象
-		if sshConfig.Host != "" && sshConfig.Port != 0 && sshConfig.Username != "" && sshConfig.Password != "" {
+		if sshConfig.Host != "" &&
+			sshConfig.Port != 0 &&
+			sshConfig.Username != "" &&
+			sshConfig.Password != "" {
 			config := &ssh.ClientConfig{
 				User: sshConfig.Username,
 				Auth: []ssh.AuthMethod{

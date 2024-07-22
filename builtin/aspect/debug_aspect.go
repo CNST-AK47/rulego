@@ -22,8 +22,10 @@ import (
 
 var (
 	// Compile-time check Debug implements types.BeforeAspect.
+	// 检查是否继承了对应接口
 	_ types.BeforeAspect = (*Debug)(nil)
 	// Compile-time check Debug implements types.AfterAspect.
+	// 检查是否继承了对应接口
 	_ types.AfterAspect = (*Debug)(nil)
 )
 
@@ -48,12 +50,14 @@ func (aspect *Debug) PointCut(ctx types.RuleContext, msg types.RuleMsg, relation
 	return true
 }
 
+// 切点之前执行函数
 func (aspect *Debug) Before(ctx types.RuleContext, msg types.RuleMsg, relationType string) types.RuleMsg {
 	//异步记录In日志
 	aspect.onDebug(ctx, types.In, msg, relationType, nil)
 	return msg
 }
 
+// 切点之后执行函数
 func (aspect *Debug) After(ctx types.RuleContext, msg types.RuleMsg, err error, relationType string) types.RuleMsg {
 	//异步记录Out日志
 	aspect.onDebug(ctx, types.Out, msg, relationType, err)
@@ -65,5 +69,6 @@ func (aspect *Debug) onDebug(ctx types.RuleContext, flowType string, msg types.R
 	if ctx.RuleChain() != nil {
 		chainId = ctx.RuleChain().GetNodeId().Id
 	}
+	// 打印debug信息
 	ctx.OnDebug(chainId, flowType, ctx.Self().GetNodeId().Id, msg, relationType, err)
 }

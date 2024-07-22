@@ -41,11 +41,13 @@ func (p *JsonParser) DecodeRuleChain(config types.Config, aspects types.AspectLi
 
 func (p *JsonParser) DecodeRuleNode(config types.Config, dsl []byte, chainCtx types.Node) (types.Node, error) {
 	if node, err := ParserRuleNode(dsl); err == nil {
+		// 创建默认规则链上下文
 		if chainCtx == nil {
 			return InitRuleNodeCtx(config, nil, nil, &node)
 		} else if ruleChainCtx, ok := chainCtx.(*RuleChainCtx); !ok {
 			return nil, errors.New("ruleChainCtx needs to be provided")
 		} else {
+			// 初始化带上下文的规则链根节点
 			return InitRuleNodeCtx(config, ruleChainCtx, ruleChainCtx.aspects, &node)
 		}
 	} else {
