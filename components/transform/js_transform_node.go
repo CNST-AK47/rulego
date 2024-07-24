@@ -29,6 +29,7 @@ package transform
 import (
 	"errors"
 	"fmt"
+
 	"github.com/rulego/rulego/api/types"
 	"github.com/rulego/rulego/components"
 	"github.com/rulego/rulego/components/js"

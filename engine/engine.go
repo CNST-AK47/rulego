@@ -271,7 +271,6 @@ func (ctx *DefaultRuleContext) TellSelf(msg types.RuleMsg, delayMs int64) {
 func (ctx *DefaultRuleContext) TellNextOrElse(msg types.RuleMsg, defaultRelationType string, relationTypes ...string) {
 	ctx.tellOrElse(msg, nil, defaultRelationType, relationTypes...)
 }
-
 func (ctx *DefaultRuleContext) NewMsg(msgType string, metaData types.Metadata, data string) types.RuleMsg {
 	return types.NewMsg(0, msgType, types.JSON, metaData, data)
 }
@@ -321,7 +320,8 @@ func (ctx *DefaultRuleContext) SubmitTack(task func()) {
 		}
 	} else {
 		// 执行任务函数
-		go task()
+		//go task()
+		task()
 	}
 }
 
@@ -934,8 +934,18 @@ func (e *RuleEngine) onMsgAndWait(msg types.RuleMsg, wait bool, opts ...types.Ru
 		rootCtx := e.rootRuleChainCtx.rootRuleContext.(*DefaultRuleContext)
 		// 进行复制
 		rootCtxCopy := NewRuleContext(
-			rootCtx.GetContext(), rootCtx.config, rootCtx.ruleChainCtx, rootCtx.from, rootCtx.self, rootCtx.pool, rootCtx.onEnd, e.ruleChainPool)
+			rootCtx.GetContext(),
+			rootCtx.config,
+			rootCtx.ruleChainCtx,
+			rootCtx.from,
+			rootCtx.self,
+			rootCtx.pool,
+			rootCtx.onEnd,
+			e.ruleChainPool,
+		)
+		// 设置是否为第一个
 		rootCtxCopy.isFirst = rootCtx.isFirst
+		// 设置运行时闪照
 		rootCtxCopy.runSnapshot = NewRunSnapshot(msg.Id, rootCtxCopy.ruleChainCtx, time.Now().UnixMilli())
 		// Apply the provided options to the context copy.
 		// 进行上下文设置

@@ -42,14 +42,16 @@ func main() {
 	}
 	// 消息
 	msg := types.NewMsg(0, "TEST_MSG_TYPE1", types.JSON, metaData, "{\"temperature\":41}")
+	endCount := 0
 	// 处理对应的消息
 	ruleEngine.OnMsg(msg, types.WithEndFunc(func(ctx types.RuleContext, msg types.RuleMsg, err error) {
-		fmt.Println("msg处理结果=====")
+		fmt.Printf("msg处理结果==%d===\n", endCount)
+		endCount++
 		//得到规则链处理结果
 		fmt.Println(msg, err)
 	}))
 
-	time.Sleep(time.Second * 30)
+	time.Sleep(time.Second * 3000)
 }
 
 var chainJsonFile = `
@@ -74,13 +76,21 @@ var chainJsonFile = `
         "type": "restApiCall",
         "name": "调用restApi增强数据",
         "configuration": {
-          "restEndpointUrlPattern": "http://192.168.136.26:9099/api/msgHandle",
-          "requestMethod": "POST",
+          "restEndpointUrlPattern": "https://www.baidu.com/",
+          "requestMethod": "GET",
           "maxParallelRequestsCount": 200
         }
       },
-		{
+	 {
         "id": "s3",
+        "type": "jsTransform",
+        "name": "继续转换http响应数据",
+        "configuration": {
+          "jsScript": "msg['addField2']='addValue22'; return {'msg':msg,'metadata':metadata,'msgType':msgType};"
+        }
+      },
+	{
+        "id": "s5",
         "type": "jsTransform",
         "name": "继续转换http响应数据",
         "configuration": {
@@ -105,6 +115,11 @@ var chainJsonFile = `
       {
         "fromId": "s2",
         "toId": "s3",
+        "type": "Success"
+      },
+	  {
+        "fromId": "s3",
+        "toId": "s5",
         "type": "Success"
       },
 		{
