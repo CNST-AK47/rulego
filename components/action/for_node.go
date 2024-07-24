@@ -35,7 +35,7 @@ import (
 	"github.com/expr-lang/expr"
 	"github.com/expr-lang/expr/vm"
 	"github.com/rulego/rulego/api/types"
-	"github.com/rulego/rulego/components"
+	"github.com/rulego/rulego/components/base"
 	"github.com/rulego/rulego/utils/maps"
 	"github.com/rulego/rulego/utils/str"
 	"strconv"
@@ -126,11 +126,9 @@ func (x *ForNode) Init(_ types.Config, configuration types.Configuration) error 
 
 // OnMsg processes the message.
 func (x *ForNode) OnMsg(ctx types.RuleContext, msg types.RuleMsg) {
-	evn, err := components.NodeUtils.GetEvn(ctx, msg)
-	if err != nil {
-		ctx.TellFailure(msg, err)
-		return
-	}
+	var err error
+	evn := base.NodeUtils.GetEvn(ctx, msg)
+	var inData = msg.Data
 	var data interface{}
 	var exprVm = vm.VM{}
 	if x.program != nil {
@@ -197,6 +195,8 @@ func (x *ForNode) OnMsg(ctx types.RuleContext, msg types.RuleMsg) {
 	default:
 		err = errors.New("value is not a supported. must array slice or struct type")
 	}
+	//不修改in data
+	msg.Data = inData
 	if err != nil {
 		ctx.TellFailure(msg, err)
 	} else {
