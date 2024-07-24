@@ -18,16 +18,13 @@ package str
 
 import (
 	"fmt"
-<<<<<<< HEAD
-=======
-	"github.com/rulego/rulego/utils/json"
-	"github.com/rulego/rulego/utils/maps"
->>>>>>> 80d8f2c95db13b1b97e7e6b059acbcafd5288a01
 	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/rulego/rulego/utils/maps"
 
 	"github.com/rulego/rulego/utils/json"
 )
@@ -86,17 +83,10 @@ func SprintfVar(pattern string, keyPrefix string, dict map[string]string) string
 	return result
 }
 
-<<<<<<< HEAD
-// 将第一个个变量进行替换
-func ProcessVar(pattern, key, val string) string {
-	// 变量信息
-	varPattern := varPatternLeft + key + varPatternRight
-	return strings.Replace(pattern, varPattern, val, -1)
-=======
+// 对第一个变量进行修改
 func ProcessVar(s, varKey, newVal string) string {
 	varPattern := varPatternLeft + varKey + varPatternRight
 	return strings.Replace(s, varPattern, newVal, -1)
->>>>>>> 80d8f2c95db13b1b97e7e6b059acbcafd5288a01
 }
 
 const randomStrOptions = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

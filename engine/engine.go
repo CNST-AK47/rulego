@@ -320,8 +320,8 @@ func (ctx *DefaultRuleContext) SubmitTack(task func()) {
 		}
 	} else {
 		// 执行任务函数
-		//go task()
-		task()
+		go task()
+		//task()
 	}
 }
 

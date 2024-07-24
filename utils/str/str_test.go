@@ -20,10 +20,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/rulego/rulego/test/assert"
 	"math"
 	"reflect"
 	"testing"
+
+	"github.com/rulego/rulego/test/assert"
 )
 
 func TestProcessVar(t *testing.T) {
