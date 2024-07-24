@@ -155,7 +155,7 @@ func InitRuleChainCtx(config types.Config, aspects types.AspectList, ruleChainDe
 		// 查询节点关系
 		nodeRelations, ok := ruleChainCtx.nodeRoutes[inNodeId]
 		if !ok {
-			nodeRelations = []types.RuleNodeRelation{ruleNodeRelation}
+			nodeRelations = []types.RuleNodeRelation{}
 		}
 		nodeRelations = append(nodeRelations, ruleNodeRelation)
 		// 更新节点路由
