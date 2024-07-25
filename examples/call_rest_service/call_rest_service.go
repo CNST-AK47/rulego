@@ -51,7 +51,7 @@ func main() {
 		fmt.Println(msg, err)
 	}))
 
-	time.Sleep(time.Second * 3000)
+	time.Sleep(time.Second * 300)
 }
 
 var chainJsonFile = `
@@ -59,7 +59,8 @@ var chainJsonFile = `
   "ruleChain": {
 	"id":"rule01",
     "name": "测试规则链",
-    "root": true
+    "root": true,
+    "debugMode":true
   },
   "metadata": {
     "nodes": [
@@ -67,6 +68,7 @@ var chainJsonFile = `
         "id": "s1",
         "type": "jsTransform",
         "name": "转换",
+		"debugMode":true,
         "configuration": {
           "jsScript": "metadata['name']='test02';\n metadata['index']=22;\n msg['addField']='addValue2'; return {'msg':msg,'metadata':metadata,'msgType':msgType};"
         }
@@ -75,6 +77,7 @@ var chainJsonFile = `
         "id": "s2",
         "type": "restApiCall",
         "name": "调用restApi增强数据",
+		"debugMode":true,
         "configuration": {
           "restEndpointUrlPattern": "https://www.baidu.com/",
           "requestMethod": "GET",
@@ -85,6 +88,7 @@ var chainJsonFile = `
         "id": "s3",
         "type": "jsTransform",
         "name": "继续转换http响应数据",
+		"debugMode":true,
         "configuration": {
           "jsScript": "msg['addField2']='addValue22'; return {'msg':msg,'metadata':metadata,'msgType':msgType};"
         }
@@ -93,6 +97,7 @@ var chainJsonFile = `
         "id": "s5",
         "type": "jsTransform",
         "name": "继续转换http响应数据",
+		 "debugMode": true,
         "configuration": {
           "jsScript": "msg['addField2']='addValue22'; return {'msg':msg,'metadata':metadata,'msgType':msgType};"
         }

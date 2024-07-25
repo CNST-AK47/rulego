@@ -32,15 +32,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
+	"sync"
+
 	"github.com/expr-lang/expr"
 	"github.com/expr-lang/expr/vm"
 	"github.com/rulego/rulego/api/types"
 	"github.com/rulego/rulego/components/base"
 	"github.com/rulego/rulego/utils/maps"
 	"github.com/rulego/rulego/utils/str"
-	"strconv"
-	"strings"
-	"sync"
 )
 
 const (
@@ -127,6 +128,7 @@ func (x *ForNode) Init(_ types.Config, configuration types.Configuration) error 
 // OnMsg processes the message.
 func (x *ForNode) OnMsg(ctx types.RuleContext, msg types.RuleMsg) {
 	var err error
+	// 获取evn数据
 	evn := base.NodeUtils.GetEvn(ctx, msg)
 	var inData = msg.Data
 	var data interface{}
@@ -186,7 +188,7 @@ func (x *ForNode) OnMsg(ctx types.RuleContext, msg types.RuleMsg) {
 			msg.Metadata.PutValue(KeyLoopIndex, strconv.Itoa(index))
 			msg.Metadata.PutValue(KeyLoopKey, k)
 			msg.Metadata.PutValue(KeyLoopItem, str.ToString(item))
-			// 执行并，检查是否有取消请求
+			// 执行并检查是否有取消请求
 			if err = x.executeItem(ctxWithCancel, ctx, msg); err != nil {
 				break
 			}

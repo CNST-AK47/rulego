@@ -320,8 +320,8 @@ func (ctx *DefaultRuleContext) SubmitTack(task func()) {
 		}
 	} else {
 		// 执行任务函数
-		go task()
-		//task()
+		//go task()
+		task()
 	}
 }
 
@@ -375,6 +375,7 @@ func (ctx *DefaultRuleContext) SetOnAllNodeCompleted(onAllNodeCompleted func()) 
 func (ctx *DefaultRuleContext) DoOnEnd(msg types.RuleMsg, err error, relationType string) {
 	//全局回调
 	//通过`Config.OnEnd`设置
+	// 先执行config中的end函数
 	if ctx.config.OnEnd != nil {
 		ctx.SubmitTack(func() {
 			ctx.config.OnEnd(msg, err)
@@ -382,6 +383,7 @@ func (ctx *DefaultRuleContext) DoOnEnd(msg types.RuleMsg, err error, relationTyp
 	}
 	//单条消息的context回调
 	//通过OnMsgWithEndFunc(msg, endFunc)设置
+	// 再执行context回调
 	if ctx.onEnd != nil {
 		ctx.SubmitTack(func() {
 			ctx.onEnd(ctx, msg, err, relationType)
@@ -970,7 +972,7 @@ func (e *RuleEngine) onMsgAndWait(msg types.RuleMsg, wait bool, opts ...types.Ru
 		// 设置最终结尾处理函数
 		rootCtxCopy.onEnd = func(ctx types.RuleContext, msg types.RuleMsg, err error, relationType string) {
 			// Execute end aspects and update the message accordingly.
-			// 执行对应的处理函数
+			// 先执行引擎结束处理
 			msg = e.onEnd(rootCtxCopy, msg, err, relationType)
 			// Trigger the custom end callback if provided.
 			if customOnEndFunc != nil {
@@ -991,7 +993,7 @@ func (e *RuleEngine) onMsgAndWait(msg types.RuleMsg, wait bool, opts ...types.Ru
 				e.doOnAllNodeCompleted(rootCtxCopy, msg, customFunc)
 			}
 			// Process the message through the rule chain.
-			// 优先处理接下来的
+			// 进行节点处理
 			rootCtxCopy.TellNext(msg, rootCtxCopy.firstNodeRelationTypes...)
 			// Block until all nodes have completed.
 			<-c

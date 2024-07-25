@@ -26,10 +26,11 @@ package flow
 //        }
 //  }
 import (
+	"sync"
+
 	"github.com/rulego/rulego/api/types"
 	"github.com/rulego/rulego/utils/maps"
 	"github.com/rulego/rulego/utils/str"
-	"sync"
 )
 
 // 注册节点

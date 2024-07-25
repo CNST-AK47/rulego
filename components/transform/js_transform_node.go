@@ -96,7 +96,9 @@ func (x *JsTransformNode) Init(ruleConfig types.Config, configuration types.Conf
 
 // OnMsg 处理消息
 func (x *JsTransformNode) OnMsg(ctx types.RuleContext, msg types.RuleMsg) {
+	// 预定义数据
 	var data interface{} = msg.Data
+	// 进行数据解析
 	if msg.DataType == types.JSON {
 		var dataMap interface{}
 		if err := json.Unmarshal([]byte(msg.Data), &dataMap); err == nil {
@@ -105,12 +107,16 @@ func (x *JsTransformNode) OnMsg(ctx types.RuleContext, msg types.RuleMsg) {
 			data = make(map[string]interface{})
 		}
 	}
+	// 执行js数据过滤指令
+	// 获取输出
 	out, err := x.jsEngine.Execute("Transform", data, msg.Metadata.Values(), msg.Type)
 	if err != nil {
 		ctx.TellFailure(msg, err)
 	} else {
+		// 转换输出数据为map
 		formatData, ok := out.(map[string]interface{})
 		if ok {
+			// 更新msg对应值
 			if formatMsgType, ok := formatData[types.MsgTypeKey]; ok {
 				msg.Type = string2.ToString(formatMsgType)
 			}
@@ -120,6 +126,7 @@ func (x *JsTransformNode) OnMsg(ctx types.RuleContext, msg types.RuleMsg) {
 			}
 
 			if formatMsgData, ok := formatData[types.MsgKey]; ok {
+				// 设置新值
 				if newValue, err := string2.ToStringMaybeErr(formatMsgData); err == nil {
 					msg.Data = newValue
 				} else {
@@ -127,6 +134,7 @@ func (x *JsTransformNode) OnMsg(ctx types.RuleContext, msg types.RuleMsg) {
 					return
 				}
 			}
+			// 进行下一步的运算
 			ctx.TellNext(msg, types.Success)
 		} else {
 			ctx.TellFailure(msg, JsTransformReturnFormatErr)

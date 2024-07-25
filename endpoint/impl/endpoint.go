@@ -21,13 +21,14 @@ package impl
 import (
 	"context"
 	"fmt"
+	"strings"
+	"sync"
+	"sync/atomic"
+
 	"github.com/rulego/rulego/api/types"
 	"github.com/rulego/rulego/api/types/endpoint"
 	"github.com/rulego/rulego/engine"
 	"github.com/rulego/rulego/utils/str"
-	"strings"
-	"sync"
-	"sync/atomic"
 )
 
 const (

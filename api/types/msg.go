@@ -91,7 +91,8 @@ func (md Metadata) Values() map[string]string {
 }
 
 // RuleMsg is a type for messages within the rule engine.
-// 规则message 异常
+// 规则message
+// 用于进行消传递
 type RuleMsg struct {
 	// Ts is the message timestamp.
 	Ts int64 `json:"ts"`
